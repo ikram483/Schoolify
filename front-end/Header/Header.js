@@ -9,7 +9,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Entypo } from '@expo/vector-icons';
 import { useState } from 'react';
-import ProfileInfo from '../ProfileInfo/ProfileInfo';
+import ProfileInfo from '../screens/ProfileInfo/ProfileInfo';
 
 export default function Header(props) {
   
@@ -32,8 +32,6 @@ export default function Header(props) {
   const styles = StyleSheet.create({
    
     header:{
-      
-     
       paddingVertical:50,
       paddingHorizontal:20,
       height:'38%',

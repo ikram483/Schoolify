@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import SignUp from './SignUp/SignUp';
 import Login from './Login/Login';
-import ProfileInfo from "./ProfileInfo/ProfileInfo";
+import ProfileInfo from "./screens/ProfileInfo/ProfileInfo";
 import WelcomeScreen from "./WelcomeScreen/WelcomeScreen";
 import SchoolContainer from "./Components/School";
 import HomeContainer from "./HomeContainer/HomeContainer";

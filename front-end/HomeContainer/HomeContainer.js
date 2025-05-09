@@ -1,22 +1,151 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, SafeAreaView, Dimensions } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import HomeworkScreen from '../screens/HomeworkScreen';
+// Import des écrans
 import MessagesScreen from '../screens/MessagesScreen';
 import PlanningScreen from '../screens/PlanningScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import Login from '../Login/Login';
+import SignUp from '../SignUp/SignUp';
+import ProfileInfo from '../screens/ProfileInfo/ProfileInfo.js';
 
 const Tab = createBottomTabNavigator();
+const windowWidth = Dimensions.get('window').width;
 
+// Composant TabBar personnalisé
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  return (
+    <View style={tabBarStyles.container}>
+      {state.routes.map((route, index) => {
+        // Ne pas afficher les onglets cachés
+        if (route.name === 'Login' || route.name === 'SignUp' || route.name === 'ProfileInfo') {
+          return null;
+        }
+        
+        const { options } = descriptors[route.key];
+        const label = options.tabBarLabel || route.name;
+        const isFocused = state.index === index;
+        
+        // Récupérer l'icône appropriée pour chaque onglet
+        let icon;
+        let badge = null;
+        
+        if (route.name === 'Accueil') {
+          icon = <Ionicons name="home" size={24} color={isFocused ? '#1565c0' : '#78909c'} />;
+        } else if (route.name === 'Messages') {
+          icon = <Ionicons name="chatbubble-ellipses" size={24} color={isFocused ? '#1565c0' : '#78909c'} />;
+          badge = 3;
+        } else if (route.name === 'Agenda') {
+          icon = <FontAwesome5 name="calendar-alt" size={22} color={isFocused ? '#1565c0' : '#78909c'} />;
+        } else if (route.name === 'Profil') {
+          icon = <MaterialIcons name="account-circle" size={26} color={isFocused ? '#1565c0' : '#78909c'} />;
+        }
+        
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+          });
+          
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+        
+        return (
+          <TouchableOpacity
+            key={index}
+            style={tabBarStyles.tabButton}
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+          >
+            <View style={tabBarStyles.iconContainer}>
+              {icon}
+              {badge && (
+                <View style={tabBarStyles.badge}>
+                  <Text style={tabBarStyles.badgeText}>{badge}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={[
+              tabBarStyles.label,
+              { color: isFocused ? '#1565c0' : '#78909c' }
+            ]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+// Styles pour la barre d'onglets personnalisée
+const tabBarStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    backgroundColor: '#ffffff',
+    height: 60,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 10,
+    paddingBottom: 5,
+    width: '100%',
+  },
+  tabButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: windowWidth / 4, // Force chaque onglet à prendre exactement 1/4 de la largeur
+  },
+  iconContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -10,
+    backgroundColor: '#f44336',
+    borderRadius: 10,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+});
+
+// Composant AccueilScreen inchangé
 const AccueilScreen = () => {
   const navigation = useNavigation();
   
   const handleNavigate = (screen) => {
     navigation.navigate(screen);
+  };
+
+  const handleLogin = () => {
+    navigation.navigate('Login');
   };
 
   return (
@@ -27,15 +156,26 @@ const AccueilScreen = () => {
           colors={['#1565c0', '#1e88e5', '#42a5f5']}
           style={styles.headerGradient}
         >
-          <View style={styles.profileHeader}>
-            <Image
-              source={require('../assets/profile.jpg')} 
-              style={styles.profileImage}
-            />
-            <View>
-              <Text style={styles.welcomeText}>Bienvenue</Text>
-              <Text style={styles.profileName}>Ikram</Text>
+          <View style={styles.headerContainer}>
+            <View style={styles.profileHeader}>
+              <Image
+                source={require('../assets/profile.jpg')} 
+                style={styles.profileImage}
+              />
+              <View>
+                <Text style={styles.welcomeText}>Bienvenue</Text>
+                <Text style={styles.profileName}>Ikram</Text>
+              </View>
             </View>
+            
+            {/* Bouton de connexion */}
+            <TouchableOpacity 
+              style={styles.loginButton} 
+              onPress={handleLogin}
+            >
+              <Text style={styles.loginButtonText}>Connexion</Text>
+              <Ionicons name="log-in-outline" size={20} color="#1565c0" />
+            </TouchableOpacity>
           </View>
         </LinearGradient>
 
@@ -158,66 +298,26 @@ const AccueilScreen = () => {
   );
 };
 
+// TabNavigator principal avec TabBar personnalisé
 const HomeContainer = () => (
   <Tab.Navigator
+    initialRouteName="Accueil"
+    tabBar={props => <CustomTabBar {...props} />}
     screenOptions={{
       headerShown: false,
-      tabBarActiveTintColor: '#1565c0',
-      tabBarInactiveTintColor: '#78909c',
-      tabBarStyle: {
-        backgroundColor: '#ffffff',
-        borderTopWidth: 0,
-        elevation: 10,
-        height: 60,
-        paddingBottom: 5,
-      },
-      tabBarLabelStyle: {
-        fontSize: 12,
-        fontWeight: '600',
-        marginTop: -5,
-      },
     }}
   >
-    <Tab.Screen 
-      name="Accueil" 
-      component={AccueilScreen} 
-      options={{ 
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="home" size={size} color={color} />
-        ) 
-      }} 
-    />
-    <Tab.Screen 
-      name="Messages" 
-      component={MessagesScreen} 
-      options={{ 
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="chatbubble-ellipses" size={size} color={color} />
-        ),
-        tabBarBadge: 3,
-      }} 
-    />
-    <Tab.Screen 
-      name="Agenda" 
-      component={PlanningScreen} 
-      options={{ 
-        tabBarIcon: ({ color, size }) => (
-          <FontAwesome5 name="calendar-alt" size={size-2} color={color} />
-        ) 
-      }} 
-    />
-    <Tab.Screen 
-      name="Profil" 
-      component={ProfileScreen} 
-      options={{ 
-        tabBarIcon: ({ color, size }) => (
-          <MaterialIcons name="account-circle" size={size+2} color={color} />
-        ) 
-      }} 
-    />
+    <Tab.Screen name="Accueil" component={AccueilScreen} />
+    <Tab.Screen name="Messages" component={MessagesScreen} />
+    <Tab.Screen name="Agenda" component={PlanningScreen} />
+    <Tab.Screen name="Profil" component={ProfileScreen} />
+    <Tab.Screen name="Login" component={Login} options={{ tabBarButton: () => null }} />
+    <Tab.Screen name="SignUp" component={SignUp} options={{ tabBarButton: () => null }} />
+    <Tab.Screen name="ProfileInfo" component={ProfileInfo} options={{ tabBarButton: () => null }} />
   </Tab.Navigator>
 );
 
+// Styles inchangés
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -233,6 +333,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   profileHeader: {
     flexDirection: 'row',
@@ -255,6 +360,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  loginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loginButtonText: {
+    color: '#1565c0',
+    fontWeight: 'bold',
+    marginRight: 6,
   },
   menuContainer: {
     marginTop: -30,
@@ -429,7 +552,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#90a4ae',
     marginLeft: 8,
-  },
+  }
 });
 
 export default HomeContainer;
